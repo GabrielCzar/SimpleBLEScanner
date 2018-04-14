@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    tools:context="com.example.joelwasserman.androidbletutorial.MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello Bluetooth Scanners!" />
+
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:text="Scan"
+        android:id="@+id/StartScanButton"
+       />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:text="Stop Scanning"
+        android:id="@+id/StopScanButton"
+        />
+
+    <ListView
+        android:id="@+id/peripheralListView"
+        android:layout_width="match_parent"
+        android:layout_height="400px"
+
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/PeripheralTextView"
+        android:scrollbars="vertical"
+         />
+
+
+
+</LinearLayout>
