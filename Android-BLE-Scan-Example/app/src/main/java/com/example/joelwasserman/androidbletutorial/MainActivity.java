@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,10 +29,13 @@ import android.widget.Toast;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
-
+    private final String TAG = "TIME";
+    private static int QNT = 0;
+    private static Long INITIAL = null;
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     BluetoothManager btManager;
@@ -66,11 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
         double dist;
 
-        int rssOneMeter = -62; //valor medio de txPower
+        int rssOneMeter = -62; //value media of txPower
 
-        double signalLoss = 10 * ((3.06 + 4.72) / 2);// valor medio de signalLoss
+        double loss = ((3.06 + 4.72) / 2); // value media of signalLoss
+        double signalLoss = -10 * loss;
 
-        dist = Math.pow(10, (rssOneMeter - rss) / signalLoss);
+        dist = Math.pow(10, ((rss - rssOneMeter) / signalLoss));
 
         return Double.parseDouble(decimalFormat.format(dist));
     }
@@ -94,10 +99,21 @@ public class MainActivity extends AppCompatActivity {
     private ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
+            if (INITIAL == null) {
+                INITIAL = System.currentTimeMillis();
+            }
+            long init = System.currentTimeMillis();
+            Log.d(TAG, "TIMESTAMP," + init + ",SEGUNDO," + ((init-INITIAL)/1000) + ",QNT," + QNT +
+                    ",MAC,"+result.getDevice().getAddress()+ ",RSSI,"+result.getRssi()
+                    +",NAME,"+result.getDevice().getName()+",UUIDS,"+ Arrays.toString(result.getDevice().getUuids()) +
+                    ",DIST,"+ rssToDistance(result.getRssi())
+            );
+
+            QNT ++;
             peripheralTextView.append("Device Name: " +
                     result.getDevice().getName() +
                     " RSSI: " + result.getRssi() +
-//                    " ADDRESS: " + result.getDevice().getAddress() +
+                    " ADDRESS: " + result.getDevice().getAddress() +
                     " DIST " + calculateDistance(result.getRssi()) +
                     " D: " + rssToDistance(result.getRssi()) +
                     "\n");
@@ -219,8 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void stopScanning() {
         System.out.println("stopping scanning");
-        ArrayList<String> list = new ArrayList<>();
-        list.addAll(peripheralDevices.keySet());
+        ArrayList<String> list = new ArrayList<>(peripheralDevices.keySet());
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list);
@@ -237,13 +252,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public boolean connect(BluetoothDevice device){
+    public void connect(BluetoothDevice device){
         if(device == null)
-            return false;
+            return;
 
         Toast.makeText(getApplicationContext(),"CONNECTED", Toast.LENGTH_LONG).show();
         device.connectGatt(getApplicationContext(),true, mGattCallback);
-        return true;
     }
 
 
